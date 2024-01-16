@@ -7,26 +7,28 @@ using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
-
+    //Oyuncu hareketi ile ilgili deðiþkenler
     private float movementInputDirection;
     private float jumpTimer;
     private float turnTimer;
     private float wallJumpTimer;
-    private float dashTimeLeft; //Dash6
-    private float lastImageXpos; // Dash7
-    private float lastDash = -100f; // Dash8
+    private float dashTimeLeft; 
+    private float lastImageXpos; 
+    private float lastDash = -100f; 
     private float knockbackStartTime;
     [SerializeField]
     private float knockbackDuration;
 
+    //Zýplama
     private int amountOfJumpsLeft;
     private int facingDirection = 1;
     private int lastWallJumpDirection;
 
-    private bool isFacingRight = true;//#1 saða sola dönme
-    private bool isWalking; //animator'de yürümeye geçme
+    //Oyuncunun bulunduðu durumlar için boole veri tipi
+    private bool isFacingRight = true;
+    private bool isWalking; 
     private bool isGrounded;
-    private bool isTouchinWall;//duvar hissetme
+    private bool isTouchinWall;
     private bool isWallSliding;
     private bool canNormalJump;
     private bool canWallJump;
@@ -38,7 +40,7 @@ public class PlayerController : MonoBehaviour
     private bool isTouchingLedge;
     private bool canClimbLedge = false;
     private bool ledgeDetected;
-    private bool isDashing; //Dash1
+    private bool isDashing; 
     private bool knockback;
 
     [SerializeField]
@@ -66,10 +68,10 @@ public class PlayerController : MonoBehaviour
     public float jumpTimerSet = 0.15f;
     public float turnTimerSet = 0.1f;
     public float wallJumpTimerSet = 0.5f;
-    public float dashTime; //Dash2
-    public float dashSpeed; //Dash3
-    public float distanceBetweenImage; //Dash4
-    public float dashCoolDown; //Dash5
+    public float dashTime; 
+    public float dashSpeed; 
+    public float distanceBetweenImage; 
+    public float dashCoolDown; 
 
 
     public float ledgeClimbXOffset1 = 0f;
@@ -77,16 +79,17 @@ public class PlayerController : MonoBehaviour
     public float ledgeClimbXOffset2 = 0f;
     public float ledgeClimbYOffset2 = 0f;
 
-
+    //duvar atlama yönü
     public Vector2 wallHopDirection;
     public Vector2 wallJumpDirection;
 
-
+    //zemin, duvar ve çýkýntýlarý tespit etmek için kontrol noktalarý
     public Transform groundCheck;
     public Transform wallCheck;
     public Transform ledgeCheck;
 
-    public LayerMask whatIsGround;//yere dokunuyor mu
+    //Oyuncu yerde mi diye kontrol etme
+    public LayerMask whatIsGround;
 
 
 
@@ -99,7 +102,7 @@ public class PlayerController : MonoBehaviour
         wallJumpDirection.Normalize();
     }
 
-
+    //kare baþýna 1 kez çaðýrýlýr
     void Update()
     {
         CheckInput();
@@ -113,13 +116,13 @@ public class PlayerController : MonoBehaviour
         CheckKnockback();
     }
 
-
+    //Hareket uygulamak ve çevreyi kontrol etmek için
     private void FixedUpdate()
     {
         ApplyMovement();
         CheckSurroundings();
     }
-    
+    //duvarda kayma yapýyor mu, yapmýyor mu
     private void CheckIfWallSliding()
     {
         if(isTouchinWall && movementInputDirection == facingDirection && rb.velocity.y < 0 && !canClimbLedge)
@@ -143,7 +146,7 @@ public class PlayerController : MonoBehaviour
         knockbackStartTime = Time.time;
         rb.velocity = new Vector2(knockbackSpeed.x * direction, knockbackSpeed.y);
     }
-
+    //geri itmenin etkin olup olmadýðýný kontrol eder ve oyuncunun hýzýný sýfýrlar
     private void CheckKnockback()
     {
         if(Time.time >= knockbackStartTime + knockbackDuration && knockback)
@@ -152,7 +155,8 @@ public class PlayerController : MonoBehaviour
             rb.velocity = new Vector2(0.0f, rb.velocity.y);
         }
     }
-
+    
+    //kenar algýlamayý kontrol eder ve týrmanmayý ayarlar
     private void CheckLedgeClimb()
     {
         if(ledgeDetected && !canClimbLedge)
@@ -182,7 +186,7 @@ public class PlayerController : MonoBehaviour
         }
         
     }
-
+    //Çýkýntýya týrmanmayý bitirir, konumlarý sýfýrlar ve hareketi ve takla atmayý etkinleþtirir
     public void FinishLedgeClimb()
     {
         canClimbLedge = false;
@@ -195,18 +199,20 @@ public class PlayerController : MonoBehaviour
 
     public void CheckSurroundings()
     {
+        //Oyuncunun yerde mi, duvara mý yoksa bir çýkýntýya mý dokunduðunu kontrol eder
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, whatIsGround);
 
         isTouchinWall = Physics2D.Raycast(wallCheck.position, transform.right, wallCheckDistance, whatIsGround);
         isTouchingLedge = Physics2D.Raycast(ledgeCheck.position, transform.right, wallCheckDistance, whatIsGround);
 
-        if(isTouchinWall && !isTouchingLedge && !ledgeDetected)
+        //Bir duvara dokunduðunuzda çýkýntý algýlamayý günceller
+        if (isTouchinWall && !isTouchingLedge && !ledgeDetected)
         {
             ledgeDetected = true;
             ledgePosBot = wallCheck.position;
         }
     }
-
+    //Oyuncunun normal bir atlama, duvardan atlama veya bitkin atlama yapýp yapamayacaðýný kontrol eder
     private void CheckIfCanJump()
     {
         if(isGrounded && rb.velocity.y <= 0.01f)
@@ -229,9 +235,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void CheckMovementDirection()//#3 saða sola dönme
+    private void CheckMovementDirection()
     {
-        if(isFacingRight && movementInputDirection < 0)
+        //Ters yönde hareket ederse oynatýcýyý çevirir
+        if (isFacingRight && movementInputDirection < 0)
         {
             Flip();
         }
@@ -240,6 +247,7 @@ public class PlayerController : MonoBehaviour
             Flip();
         }
 
+        //Yatay hýza göre yürüme durumunu ayarlar
         if (Mathf.Abs(rb.velocity.x) >= 0.01f)
         {
             isWalking = true;
@@ -252,13 +260,14 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimations()
     {
+        //Animatör parametrelerini oynatýcý durumuna göre günceller
         anim.SetBool("isWalking", isWalking);
         anim.SetBool("isGrounded", isGrounded);
         anim.SetFloat("yVelocity", rb.velocity.y);
         anim.SetBool("isWallSliding", isWallSliding);
     }
 
-
+    //Hareket, atlama ve atýlma için oyuncu girdilerini yönetir
     private void CheckInput()
     {
         movementInputDirection = Input.GetAxisRaw("Horizontal");
@@ -297,37 +306,41 @@ public class PlayerController : MonoBehaviour
                 canFlip = true; 
             }
         }
-
+        //Atlama düðmesi býrakýldýðýnda deðiþken atlama yüksekliðini yönetir
         if (checkJumpMultiplier && !Input.GetButton("Jump"))
         {
             checkJumpMultiplier = false;
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * variableJumpHeightMultiplier);
         }
-
-        if (Input.GetKeyDown(KeyCode.LeftShift))//Dash9 
+        //Dash'i baþlatýr
+        if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             if (Time.time >= (lastDash + dashCoolDown))
             AttempToDash();
         }
     }
-
-    private void AttempToDash()//Dash10
+    
+    private void AttempToDash()
     {
+        //Dash'i baþlatýr
         isDashing = true;
         dashTimeLeft = dashTime;
         lastDash = Time.time;
 
+        //Bir görüntü sonrasý efekti yaratýr
         PlayerAfterImagePool.Instance.GetFromPool();
         lastImageXpos = transform.position.x;
     }
 
     public int GetFacingDirection()
     {
+        //Oynatýcýnýn geçerli bakma yönünü döndürür
         return facingDirection;
     }
 
-    private void CheckDash()//dash11
+    private void CheckDash()
     {
+        //Çizgi mekaniðini yönetir
         if (isDashing)
         {
             if(dashTimeLeft > 0)
@@ -355,10 +368,11 @@ public class PlayerController : MonoBehaviour
 
     private void CheckJump()
     {
-        if(jumpTimer > 0)
+        //Düzenli atlamalar ve duvar atlamalarýnýn mantýðýný yönetir
+        if (jumpTimer > 0)
         {
-            //WallJump
-            if(!isGrounded && isTouchinWall && movementInputDirection != 0 && movementInputDirection != facingDirection)
+            //Atlama zamanlayýcýsý sýrasýnda duvar atlama durumunu kontrol eder
+            if (!isGrounded && isTouchinWall && movementInputDirection != 0 && movementInputDirection != facingDirection)
             {
                 WallJump();
             }
@@ -366,21 +380,24 @@ public class PlayerController : MonoBehaviour
             {
                 NormalJump();
             }
-            if(isAttemptingToJump)
+            //Atlamaya çalýþýrken atlama zamanlayýcýsýný azaltýr
+            if (isAttemptingToJump)
             {
                 jumpTimer -= Time.deltaTime;
             }
         }
-
-        if(wallJumpTimer > 0)
+        //Duvardan atlama kurtarma zamanlayýcýsýný yönetir
+        if (wallJumpTimer > 0)
         {
             if(hasWallJumped && movementInputDirection == -lastWallJumpDirection)
             {
+                //Duvar atlamasýndan sonra kalan dikey hýzý iptal eder
                 rb.velocity = new Vector2(rb.velocity.x, 0.0f);
                 hasWallJumped = false;
             }
             else if(wallJumpTimer <= 0)
             {
+                //Zamanlayýcý bittiðinde duvar atlama durumunu sýfýrlar
                 hasWallJumped = false;
             }
             else
@@ -391,7 +408,7 @@ public class PlayerController : MonoBehaviour
 
         
     }
-
+    //Koþullar karþýlanýrsa normal bir sýçrama gerçekleþtirir
     private void NormalJump()
     {
         if (canNormalJump)
@@ -403,17 +420,20 @@ public class PlayerController : MonoBehaviour
             checkJumpMultiplier = true;
         }
     }
-
+    //Koþullar karþýlanýrsa duvardan atlama gerçekleþtirir
     private void WallJump()
     {
         if (canWallJump)
         {
+            //Duvar kaymasýný iptal eder ve atlamayla ilgili parametreleri sýfýrlar
             rb.velocity = new Vector2(rb.velocity.x, 0.0f);
             isWallSliding = false;
             amountOfJumpsLeft = amountOfJumps;
             amountOfJumpsLeft--;
+            //Duvardan atlama için kuvvet uygular
             Vector2 forceToAdd = new Vector2(wallJumpForce * wallJumpDirection.x * movementInputDirection, wallJumpForce * wallJumpDirection.y);
             rb.AddForce(forceToAdd, ForceMode2D.Impulse);
+            //Atlamayla ilgili durumlarý ve zamanlayýcýlarý sýfýrlar
             jumpTimer = 0;
             isAttemptingToJump = false;
             checkJumpMultiplier = true;
@@ -428,16 +448,18 @@ public class PlayerController : MonoBehaviour
 
     private void ApplyMovement()
     {
-        if(!isGrounded && !isWallSliding && movementInputDirection == 0 && !knockback)
+        //Oyuncunun durumuna göre hareket kuvvetleri uygular
+        if (!isGrounded && !isWallSliding && movementInputDirection == 0 && !knockback)
         {
             rb.velocity = new Vector2(rb.velocity.x * airDragMultiplier, rb.velocity.y);
         }
         else if(canMove && !knockback)
         {
+            //Geri itme altýnda olmadýðýnda normal hareket kuvveti uygular
             rb.velocity = new Vector2(movementSpeed * movementInputDirection, rb.velocity.y);
         }
 
-
+        //Duvar kayma hareketini yönetir
         if (isWallSliding)
         {
             if(rb.velocity.y < -wallSlideSpeed)
@@ -446,18 +468,20 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
-    public void DisableFlip()//playercombatcontroller
+    
+    public void DisableFlip()
     {
+        //çevirme yeteneðini devre dýþý býrakýr
         canFlip = false;
     }
 
     public void EnableFlip()
     {
+        //Çevirme yeteneðini etkinleþtirir
         canFlip = true;
     }
-
-    private void Flip()//#2 saða sola dönme
+    //Oyuncu karakterini çevirir ve bakan yönü günceller
+    private void Flip()
     {
         if (!isWallSliding && canFlip && !knockback)
         {
@@ -467,11 +491,13 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-
+    //Unity editöründe zemin ve duvar kontrolleri için görselleþtirme çizer
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
 
         Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance, wallCheck.position.y, wallCheck.position.z));
     }
+
+
 }

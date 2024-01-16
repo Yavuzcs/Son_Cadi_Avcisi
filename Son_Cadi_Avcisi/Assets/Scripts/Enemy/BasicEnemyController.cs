@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class BasicEnemyController : MonoBehaviour
 {
+    //Durumlarý tanýmlayan enum
     private enum State
     {
         Moving,
@@ -12,7 +13,7 @@ public class BasicEnemyController : MonoBehaviour
         Dead
     }
 
-    private State currentState;
+    private State currentState;// Mevcut durumu saklayan deðiþken
 
     [SerializeField]
     private float
@@ -24,8 +25,8 @@ public class BasicEnemyController : MonoBehaviour
         lastTouchDamageTime,
         touchDamageCooldown,
         touchDamage,
-        touchDamageWidth, //dokunma hasarý
-        touchDamageHeight; // dokunma hasarý yüksekliði
+        touchDamageWidth, 
+        touchDamageHeight; 
     [SerializeField]
     private Transform
         groundCheck,
@@ -70,6 +71,7 @@ public class BasicEnemyController : MonoBehaviour
 
     private void Start()
     {
+        //Referanslarý baþlatma
         alive = transform.Find("Alive").gameObject;
         aliveRb = alive.GetComponent<Rigidbody2D>();
         aliveAnim = alive.GetComponent<Animator>();
@@ -78,7 +80,7 @@ public class BasicEnemyController : MonoBehaviour
         facingDirection = 1;
     }
 
-
+    //Mevcut duruma göre güncelleme yapma
     private void Update()
     {
         switch (currentState)
@@ -104,12 +106,13 @@ public class BasicEnemyController : MonoBehaviour
 
     private void UpdateMovingState()
     {
+        //Zemin kontrolü ve hareket etme
         groundDetected = Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
         wallDetected = Physics2D.Raycast(wallCheck.position, transform.right, wallCheckDistance, whatIsGround);
 
         CheckTouchDamage();
-
-        if(!groundDetected || wallDetected)
+        //Zemin yoksa veya duvar varsa yönlendirmeyi deðiþtirme, aksi halde hareket etme
+        if (!groundDetected || wallDetected)
         {
             Flip();
         }
@@ -127,9 +130,10 @@ public class BasicEnemyController : MonoBehaviour
     }
 
     // KNOCK BAKE STATE-------------------------------------
-
+    
     private void EnterKnockbackState()
     {
+        //Knockback state'e geçiþte yapýlacaklar
         knockbackStartTime = Time.time;
         movement.Set(knockbackSpeed.x * damageDirection, knockbackSpeed.y);
         aliveRb.velocity = movement;
@@ -138,7 +142,8 @@ public class BasicEnemyController : MonoBehaviour
 
     private void UpdateKnockbackState()
     {
-        if(Time.time >= knockbackStartTime + knockbackDuration)
+        //Belirlenen süre boyunca knockback state'de kalma
+        if (Time.time >= knockbackStartTime + knockbackDuration)
         {
             SwitchState(State.Moving);
         }
@@ -146,6 +151,7 @@ public class BasicEnemyController : MonoBehaviour
 
     private void ExitKnockbackState()
     {
+        //Knockback state'den çýkýþta yapýlacaklar
         aliveAnim.SetBool("Knockback", false);
     }
 
@@ -155,6 +161,7 @@ public class BasicEnemyController : MonoBehaviour
 
     private void EnterDeadState()
     {
+        //Dead state'e geçiþte yapýlacaklar
         Instantiate(deathChunkParticle, alive.transform.position, deathChunkParticle.transform.rotation);
         Instantiate(deathBloodParticle, alive.transform.position, deathBloodParticle.transform.rotation);
         Destroy(gameObject);
@@ -174,10 +181,11 @@ public class BasicEnemyController : MonoBehaviour
 
     private void Damage(float[] attackDetails)
     {
+        //Hasar alma iþlemleri
         currentHealth -= attackDetails[0];
-
+        //Hasar efekti oluþturma
         Instantiate(hitParticle, alive.transform.position, Quaternion.Euler(0.0f, 0.0f, Random.Range(0.0f, 360.0f)));
-
+        //Hasarýn yönünü belirleme
         if (attackDetails[1] > alive.transform.position.x)
         {
             damageDirection = -1;
@@ -187,9 +195,8 @@ public class BasicEnemyController : MonoBehaviour
             damageDirection = 1;
         }
 
-        //Hit Particle
-
-        if(currentHealth > 0.0f)
+        //Can hala varsa Knockback state'e geçiþ, aksi halde Dead state'e geçiþ
+        if (currentHealth > 0.0f)
         {
             SwitchState(State.Knockback);
         }
@@ -201,7 +208,8 @@ public class BasicEnemyController : MonoBehaviour
 
     private void CheckTouchDamage()
     {
-        if(Time.time >= lastTouchDamageTime + touchDamageCooldown)
+        //Zamanlayýcý kontrolü ve dokunma hasarý
+        if (Time.time >= lastTouchDamageTime + touchDamageCooldown)
         {
             touchDamageBotLeft.Set(touchDamageCheck.position.x - (touchDamageWidth / 2), touchDamageCheck.position.y - (touchDamageHeight / 2));
             touchDamageTopRight.Set(touchDamageCheck.position.x + (touchDamageWidth / 2), touchDamageCheck.position.y + (touchDamageHeight / 2));
@@ -220,12 +228,14 @@ public class BasicEnemyController : MonoBehaviour
 
     private void Flip()
     {
+        //Yönü tersine çevirme
         facingDirection *= -1;
         alive.transform.Rotate(0.0f, 180.0f, 0.0f);
     }
 
     private void SwitchState(State state)
     {
+        //Durum deðiþtirme fonksiyonu
         switch (currentState)
         {
             case State.Moving:

@@ -376,6 +376,10 @@
 "Assets/Scripts/Enemy/BasicEnemyController.cs"
 "Assets/Scripts/Enemy/CombatDummyController.cs"
 "Assets/Scripts/Manager/GameManager.cs"
+"Assets/Scripts/Menu/GameOver.cs"
+"Assets/Scripts/Menu/GameOverScene.cs"
+"Assets/Scripts/Menu/Main_Menu.cs"
+"Assets/Scripts/Menu/Stop_the_Game.cs"
 "Assets/Scripts/Player/ParticleController.cs"
 "Assets/Scripts/Player/PlayerAfterImagePool.cs"
 "Assets/Scripts/Player/PlayerAfterImageSprite.cs"
@@ -383,6 +387,9 @@
 "Assets/Scripts/Player/PlayerController.cs"
 "Assets/Scripts/Player/PlayerStats.cs"
 "Assets/Sprites/Free Pixel Art Hills/Demo/MoveBackground.cs"
+"Assets/sumPause/SampleScene/PauseMenuExample.cs"
+"Assets/sumPause/SampleScene/PauseObjectExample.cs"
+"Assets/sumPause/Scripts/SumPause.cs"
 -langversion:9.0
 
 /deterministic
